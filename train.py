@@ -190,14 +190,14 @@ def train(n_gpus: int, config_path: str, rank: int, group_name: str):
                 valid_batch, valid_output, valid_loss = validation(model, loss, valid)
 
                 print(f'Step: {global_step}')
-                print(f'Train loss: {train_loss:0.4f}')
                 print(f'Valid loss: {valid_loss:0.4f}')
-
-                logger.add_scalar('train_loss', train_loss, global_step)
-                logger.add_sample('train', batch, train_output, 0, global_step)
+                print(f'Train loss: {train_loss:0.4f}')
 
                 logger.add_scalar('valid_loss', valid_loss, global_step)
                 logger.add_sample('valid', valid_batch, valid_output, 0, global_step)
+
+                logger.add_scalar('train_loss', train_loss, global_step)
+                logger.add_sample('train', batch, train_output, 0, global_step)
 
                 end_time = time.time()
                 print(f'Time per step: {(end_time - start_time) / config.training.log_step:0.2f}s')
