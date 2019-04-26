@@ -1,4 +1,5 @@
 import argparse
+import os
 from typing import Tuple
 
 import torch
@@ -204,8 +205,15 @@ def train(n_gpus: int, config_path: str, rank: int, group_name: str):
 if __name__ == '__main__':
     args = parse_args()
 
+    config = utils.read_config(args.config)
+    output_path = config.training.output_path
+
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path)
+        os.chmod(output_path, 0o775)
+
     if args.distributed:
-        train_distributed(args.config)
+        train_distributed(args.config, output_path)
     else:
         n_gpus = torch.cuda.device_count()
 

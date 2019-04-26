@@ -34,8 +34,6 @@ import torch
 import torch.distributed as dist
 from torch.autograd import Variable
 
-import utils
-
 
 def reduce_tensor(tensor, n_gpus):
     rt = tensor.clone()
@@ -169,18 +167,11 @@ def apply_gradient_allreduce(module):
     return module
 
 
-def train_distributed(config_path: str):
+def train_distributed(config_path: str, output_path: str):
     n_gpus = torch.cuda.device_count()
     current_date = time.strftime('%Y_%m_%d-%H%M%S')
 
     args_list = ['train.py', f'--config={config_path}', '--rank', f'--group_name=group_{current_date}']
-
-    config = utils.read_config(config_path)
-    output_path = config.training.output_path
-
-    if not os.path.isdir(output_path):
-        os.makedirs(output_path)
-        os.chmod(output_path, 0o775)
 
     workers = []
 
