@@ -186,22 +186,23 @@ def train(n_gpus: int, config_path: str, rank: int, group_name: str):
                 clip_grad_norm=config.training.get('clip_grad_norm', None)
             )
 
-            if global_step % config.training.log_step == 0 and rank == 0:
-                valid_batch, valid_output, valid_loss = validation(model, loss, valid)
-
+            if global_step % config.training.train_log_step == 0 and rank == 0:
                 print(f'Step: {global_step}')
-                print(f'Valid loss: {valid_loss:0.4f}')
                 print(f'Train loss: {train_loss:0.4f}')
-
-                logger.add_scalar('valid_loss', valid_loss, global_step)
-                logger.add_sample('valid', valid_batch, valid_output, 0, global_step)
 
                 logger.add_scalar('train_loss', train_loss, global_step)
                 logger.add_sample('train', batch, train_output, 0, global_step)
 
                 end_time = time.time()
-                print(f'Time per step: {(end_time - start_time) / config.training.log_step:0.2f}s')
+                print(f'Time per step: {(end_time - start_time) / config.training.train_log_step:0.2f}s')
                 start_time = end_time
+
+            if global_step % config.training.valid_log_step == 0 and rank == 0:
+                valid_batch, valid_output, valid_loss = validation(model, loss, valid)
+
+                print(f'Valid loss: {valid_loss:0.4f}')
+                logger.add_scalar('valid_loss', valid_loss, global_step)
+                logger.add_sample('valid', valid_batch, valid_output, 0, global_step)
 
             if global_step % config.training.save_step == 0 and rank == 0:
                 checkpoint_path = f'{config.training.output_path}/checkpoint_{global_step}'
