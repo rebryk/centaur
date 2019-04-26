@@ -2,7 +2,8 @@
     "data": {
         "path": "/data/LJSpeech",
         "train": "train.csv",
-        "valid": "test.csv"
+        "valid": "test.csv",
+        "n_valid_samples": 64
     },
     "model": {
         "encoder_hidden_size": 512,

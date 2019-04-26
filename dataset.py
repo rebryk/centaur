@@ -11,7 +11,6 @@ from sound import SoundConverter
 from text import text_to_sequence
 
 
-# TODO: sort dataset
 class LJDataset(Dataset):
     """LJSpeech dataset."""
 
@@ -20,24 +19,35 @@ class LJDataset(Dataset):
                  root_dir: str,
                  sound_converter: SoundConverter,
                  cleaners: str = 'english_cleaners',
-                 use_cache: bool = True):
+                 use_cache: bool = True,
+                 sort_by_len: bool = False,
+                 n_samples: int = None):
         """
         :param csv_file: path to the csv file with annotations
         :param root_dir: directory with all the wavs
         :param cleaners:
         :param sound_converter: the sound converter
         :param use_cache: whether to use cache
+        :param sort_by_len: whether to sort the dataset by text length
+        :param n_samples: number of samples to use
         """
 
         self.landmarks_frame = pd.read_csv(csv_file, sep='|', header=None)
+
+        if sort_by_len:
+            self.landmarks_frame = self.sort_dataset(self.landmarks_frame)
+
         self.root_dir = root_dir
         self.cleaners = cleaners
         self.sound_converter = sound_converter
         self.use_cache = use_cache
         self._cache = {}
+        self.n_samples = n_samples
 
     def __len__(self) -> int:
-        return len(self.landmarks_frame)
+        length = len(self.landmarks_frame)
+        n_samples = self.n_samples or length
+        return min(length, n_samples)
 
     def __getitem__(self, idx: int) -> dict:
         if self.use_cache and idx in self._cache:
@@ -57,17 +67,27 @@ class LJDataset(Dataset):
 
         return sample
 
+    @staticmethod
+    def sort_dataset(df: pd.DataFrame) -> pd.DataFrame:
+        index = df[2].str.len().sort_values().index
+        df = df.reindex(index).reset_index(drop=True)
+        return df
+
 
 def get_loader(data_path: str,
                file_name: str,
                sound_converter: SoundConverter,
                batch_size: int,
                is_distributed: bool = False,
-               n_workers: int = 4) -> DataLoader:
+               n_workers: int = 4,
+               sort_by_len: bool = False,
+               n_samples: int = None) -> DataLoader:
     dataset = LJDataset(
         csv_file=os.path.join(data_path, file_name),
         root_dir=os.path.join(data_path, 'wavs'),
-        sound_converter=sound_converter
+        sound_converter=sound_converter,
+        sort_by_len=sort_by_len,
+        n_samples=n_samples
     )
 
     sampler = DistributedSampler(dataset) if is_distributed else None

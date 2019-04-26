@@ -161,7 +161,9 @@ def train(n_gpus: int, config_path: str, rank: int, group_name: str):
         data_path=config.data.path,
         file_name=config.data.valid,
         sound_converter=sound_converter,
-        batch_size=config.training.batch_size
+        batch_size=config.training.batch_size,
+        sort_by_len=True,
+        n_samples=config.data.get('n_valid_samples', None)
     )
 
     logger = Logger(config.training.log_path, sound_converter) if rank == 0 else None
