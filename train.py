@@ -113,7 +113,7 @@ def train(n_gpus: int, config_path: str, rank: int, group_name: str):
     config = utils.read_config(config_path)
 
     # Fix random seeds
-    utils.fix_seed()
+    utils.fix_seed(rank)
 
     if n_gpus > 1:
         # TODO: remove backend and url
