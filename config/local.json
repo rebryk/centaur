@@ -1,0 +1,25 @@
+{
+    "data": {
+        "path": "/data/LJSpeech",
+        "train": "train.csv",
+        "valid": "test.csv"
+    },
+    "model": {
+        "encoder_hidden_size": 512,
+        "decoder_hidden_size": 512,
+        "reduction_factor": 2
+    },
+    "training": {
+        "log_path": "logs",
+        "output_path": "output",
+        "checkpoint_path": "",
+        "log_step": 50,
+        "save_step": 100,
+        "epochs": 1000000,
+        "batch_size": 32,
+        "n_workers": 4,
+        "lr": 0.02,
+        "weight_decay": 0.001,
+        "clip_grad_norm": 1.0
+    }
+}
